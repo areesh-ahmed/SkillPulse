@@ -5,7 +5,6 @@
   
   [![Hackathon](https://img.shields.io/badge/Event-SIH_2026-blue.svg)](#)
   [![Status](https://img.shields.io/badge/Status-MVP_Development-orange.svg)](#)
-  [![Team](https://img.shields.io/badge/Team-Hacksmiths-success.svg)](#)
 </div>
 
 <hr />
@@ -33,10 +32,10 @@ Training systems reliably capture enrolment, attendance, assessment, and certifi
 
 | Persona | Role | Goal | Frustration |
 | :--- | :--- | :--- | :--- |
-| **Rahul** | Trainee | To maintain a verified record of his skills to secure employment without registering on multiple portals. | Changed his phone number recently, lost access to his old training records, and cannot prove his certification. |
-| **Priya** | Training Provider | To accurately track and report 6-month placement outcomes to secure future government funding. | Spends hours making manual phone calls to past trainees who don't answer, resulting in "unknown outcomes." |
-| **Mr. Sharma** | Govt. Policy Maker | To allocate skilling budgets based on long-term wage progression and retention, not just certifications. | Only receives data on "enrolled" vs. "certified," lacking visibility into actual career impact. |
-| **Amit** | SME Employer | To quickly verify a candidate's training credentials before making a hiring decision. | Refuses to create an account on a complex government portal just to click "yes, I hired this person." |
+| **Trainee Profile** | Trainee | To maintain a verified record of his skills to secure employment without registering on multiple portals. | Changed his phone number recently, lost access to his old training records, and cannot prove his certification. |
+| **Provider Profile** | Training Provider | To accurately track and report 6-month placement outcomes to secure future government funding. | Spends hours making manual phone calls to past trainees who don't answer, resulting in "unknown outcomes." |
+| **Policy Maker** | Govt. Policy Maker | To allocate skilling budgets based on long-term wage progression and retention, not just certifications. | Only receives data on "enrolled" vs. "certified," lacking visibility into actual career impact. |
+| **Employer Profile** | SME Employer | To quickly verify a candidate's training credentials before making a hiring decision. | Refuses to create an account on a complex government portal just to click "yes, I hired this person." |
 
 ---
 
@@ -117,5 +116,5 @@ UI provides a "Revoke Consent" button. Backend nullifies PII (name, phone) but r
 
 ---
 <div align="center">
-  <i>Built with ❤️ by Hacksmiths for SIH 2026</i>
+  <i>Built with ❤️ for SIH 2026</i>
 </div>
