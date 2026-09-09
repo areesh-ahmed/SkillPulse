@@ -24,11 +24,21 @@ const authRoutes = require('./routes/authRoutes');
 const traineeRoutes = require('./routes/traineeRoutes');
 const trainingRoutes = require('./routes/trainingRoutes');
 const consentRoutes = require('./routes/consentRoutes');
+const employmentRoutes = require('./routes/employmentRoutes');
+const followUpRoutes = require('./routes/followUpRoutes');
+const verificationRoutes = require('./routes/verificationRoutes');
+const aiRoutes = require('./routes/aiRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/trainees', traineeRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/consent', consentRoutes);
+app.use('/api/employment', employmentRoutes);
+app.use('/api/follow-ups', followUpRoutes);
+app.use('/api/verification', verificationRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/dashboard', analyticsRoutes);
 
 // Error Handling
 app.use(notFound);
