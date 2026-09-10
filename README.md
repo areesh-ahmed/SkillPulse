@@ -12,7 +12,6 @@
 <img src="https://img.shields.io/badge/Express.js-API-000000?logo=express&logoColor=white" />
 <img src="https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white" />
 <img src="https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black" />
-<img src="https://img.shields.io/badge/Python-FastAPI-009688?logo=fastapi&logoColor=white" />
 <img src="https://img.shields.io/badge/Team-Hacksmiths-success.svg" />
 <img src="https://img.shields.io/badge/Event-SIH%202026-blue.svg" />
 
@@ -26,13 +25,14 @@
 
 - [Problem Statement](#problem-statement)
 - [Solution Design](#solution-design)
-- [System Architecture & Request Flows](#system-architecture--request-flows)
+- [System Architecture](#system-architecture)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Key Design Decisions](#key-design-decisions)
 - [Environment Configuration](#environment-configuration)
 - [Running Locally & Setup](#running-locally--setup)
-- [Testing & Quality Assurance](#testing--quality-assurance)
+- [Testing & Data Seeding](#testing--data-seeding)
+- [Implementation Status](#implementation-status)
 - [API Reference](#api-reference)
 - [Security Hardening & Privacy](#security-hardening--privacy)
 - [Contributors](#contributors)
@@ -53,14 +53,14 @@ Current training systems reliably capture enrolment, attendance, assessment, and
 
 The core insight driving the SkillPulse architecture is **minimizing friction for all stakeholders** while maintaining strict **data privacy**:
 
-- **Frictionless Employer Verification**: Employers do not need to create accounts. Verification requests are sent via magic links (secure, short-lived JWTs) that allow 1-click confirmation of a trainee's employment status.
-- **Unified Longitudinal Identity**: A single, unique UUID follows the trainee across multiple courses and employment events over years, preserving macro-analytics integrity even if they change contact details.
-- **AI-Driven Skill Gap Analysis**: A decoupled Python/FastAPI service analyzes the delta between course curriculums and employer-required skills, automatically flagging skill gaps in specific districts or cohorts.
-- **Privacy First**: Explicit opt-in consent for trainees, with the ability to revoke PII visibility while retaining anonymized macro-level data for government dashboards.
+- **Frictionless Employer Verification**: Employers can verify employment status without complex onboarding.
+- **Unified Longitudinal Identity**: A single data structure follows the trainee across multiple courses and employment events over years, preserving macro-analytics integrity.
+- **AI-Driven Skill Gap Analysis (Prototype)**: A Node.js module simulates AI-driven analysis to calculate the delta between course curriculums and employer-required skills, serving as a foundation for future integration of true machine learning models.
+- **Privacy First**: Explicit opt-in consent for trainees, with the ability to manage data privacy while retaining anonymized macro-level data for government dashboards.
 
 ---
 
-## System Architecture & Request Flows
+## System Architecture
 
 ### 1. High-Level Architecture
 ```mermaid
@@ -68,18 +68,14 @@ flowchart TD
     subgraph Frontend Clients
         DASH[React Analytics Dashboard\nPolicymakers]
         PORTAL[React Provider Portal\nTraining Providers]
-        EMP[Employer Magic Link UI\nNo-Auth]
+        EMP[Employer UI]
     end
 
     subgraph Backend Core (Node.js)
         API[Express REST API]
         AUTH[JWT Authentication & RBAC]
         AGG[MongoDB Aggregation Service]
-    end
-
-    subgraph Intelligence Layer (Python)
-        AI[FastAPI ML Service]
-        GAP[Skill Gap Analyzer]
+        AI[Mock AI/Intelligence Service]
     end
 
     DASH --> API
@@ -89,33 +85,8 @@ flowchart TD
     API --> AUTH
     API --> AGG
     API <--> AI
-    AI --> GAP
 
     AGG --> DB[(MongoDB\nPrimary Database)]
-```
-
-### 2. Employer Verification Flow
-Every inbound verification request utilizes an expiring token to remove onboarding friction for employers:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Provider as Training Provider
-    participant API as Express Server
-    participant DB as MongoDB
-    actor Employer as Employer (Email)
-
-    Provider->>API: POST /api/verify/trigger
-    API->>DB: Create Verification Record (Status: Pending)
-    API->>API: Generate Expiring JWT Magic Link
-    API->>Employer: Send Email with Magic Link URL
-    Employer->>API: GET /api/verify?token=XYZ (Clicks Link)
-    API->>API: Validate JWT Signature & Expiry
-    alt Token Invalid or Expired
-        API-->>Employer: Show Error / Expired Page
-    end
-    API->>DB: Update Record (Status: Verified)
-    API-->>Employer: Show Success Confirmation UI
 ```
 
 ---
@@ -125,11 +96,11 @@ sequenceDiagram
 | Layer | Technology | Purpose |
 |---|---|---|
 | Backend Framework | Node.js + Express.js | High-throughput REST API and authentication |
-| Frontend | React.js + Tailwind CSS | Interactive UIs for Providers and Government |
+| Frontend | React.js (v19) + Tailwind CSS | Interactive UIs for Providers and Government |
 | Data Visualization| Recharts | Dynamic, aggregated dashboard charts |
 | Database | MongoDB + Mongoose | Flexible document storage for complex longitudinal records |
-| AI/Intelligence | Python + FastAPI | Skill-gap analysis and predictive modeling (attrition) |
-| Auth | Custom JWT (HS256) | Role-Based Access Control (RBAC) and Magic Links |
+| AI/Intelligence | Node.js Mock Services | Skill-gap analysis prototype using synthesized logical rules |
+| Auth | Custom JWT (HS256) | Role-Based Access Control (RBAC) |
 
 ---
 
@@ -140,24 +111,22 @@ skillpulse/
 |
 +-- backend/
 |   +-- src/
-|   |   +-- controllers/     # Route logic (Auth, Trainee, Analytics)
-|   |   +-- models/          # Mongoose Schemas (Trainee, Course, Employment)
+|   |   +-- controllers/     # Route logic (Auth, Trainee, Analytics, AI)
+|   |   +-- models/          # Mongoose Schemas (Trainee, Course, Employment, SkillGap, etc.)
 |   |   +-- routes/          # Express route definitions
-|   |   +-- middleware/      # JWT verification, RBAC, Error handling
-|   |   +-- services/        # Business logic & MongoDB aggregations
+|   |   +-- middlewares/     # JWT verification, RBAC, Error handling
+|   |   +-- services/        # Business logic, Mock AI methods & MongoDB aggregations
+|   |   +-- scripts/         # Database seeders (seed.js)
 |   +-- .env                 # Backend configuration
+|   +-- package.json         # Node.js dependencies
 |
 +-- frontend/
 |   +-- src/
 |   |   +-- components/      # Reusable React components
-|   |   +-- pages/           # Dashboard, Provider Portal, Magic Link UI
-|   |   +-- services/        # Axios API clients
+|   |   +-- pages/           # Dashboard, Provider Portal, etc.
+|   |   +-- services/        # API clients
 |   +-- tailwind.config.js
-|
-+-- ai-service/
-|   +-- main.py              # FastAPI entry point
-|   +-- models/              # ML/NLP models for skill gap analysis
-|   +-- requirements.txt     # Python dependencies
+|   +-- package.json         # React dependencies
 |
 +-- README.md
 ```
@@ -167,13 +136,10 @@ skillpulse/
 ## Key Design Decisions
 
 **Why MongoDB instead of a Relational Database?**
-Skilling outcomes are highly variable. A trainee might have multiple overlapping courses, self-employment records, standard employment, and apprenticeship records. MongoDB's document model allows us to store an array of structured outcome events within a single unified Trainee document, making longitudinal queries significantly faster than complex SQL joins.
+Skilling outcomes are highly variable. A trainee might have multiple overlapping courses, self-employment records, standard employment, and apprenticeship records. MongoDB's document model allows us to store an array of structured outcome events within a single unified Trainee document (or tightly related collections), making longitudinal queries significantly faster than complex SQL joins.
 
-**Why decouple the AI Service in Python?**
-Node.js is excellent for concurrent I/O (handling thousands of dashboard API requests), but Python has superior libraries for NLP and machine learning (scikit-learn, pandas). Decoupling them via a microservice pattern ensures neither system blocks the other and allows independent scaling.
-
-**Why Rule-Based Fallbacks for the MVP?**
-Given the 48-hour SIH build constraint, deploying true predictive ML models immediately is high-risk. The architecture is designed to use simple rule-based heuristics initially (e.g., flagging drop-outs based on days absent), which can seamlessly be swapped with the Python ML models once they are stable, without changing the API contract.
+**Why Rule-Based Fallbacks for the MVP instead of true Machine Learning?**
+Given the 48-hour SIH build constraint, deploying true predictive ML models immediately is high-risk. The architecture is designed to use simple mock rule-based heuristics initially for detecting skill gaps and employment probabilities, simulating an AI service entirely within Node.js. These can seamlessly be swapped with dedicated AI microservices later.
 
 ---
 
@@ -186,8 +152,9 @@ Create a `.env` file in the `backend/` directory and configure the following:
 | `PORT` | Local server port | `5000` |
 | `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/skillpulse` |
 | `JWT_SECRET` | Secret for signing auth tokens | *None (Required)* |
-| `AI_SERVICE_URL` | URL of the Python FastAPI service | `http://localhost:8000` |
-| `FRONTEND_URL` | Allowed origin for CORS | `http://localhost:3000` |
+| `JWT_EXPIRE` | Expiry duration for JWT tokens | `30d` |
+
+*(Note: The frontend also requires configuration pointing to the backend API, typically through Vite configuration or a `.env` file).*
 
 ---
 
@@ -210,20 +177,27 @@ npm install
 npm run dev
 ```
 
-### 4. AI Service (Python)
-```bash
-cd ai-service
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
+---
+
+## Testing & Data Seeding
+
+- **Database Seeding**: A robust `seed.js` script inside `backend/src/scripts/` generates synthetic records across multiple collections (Outcome, WageHistory, Skill Requirement, Trainees, etc.). This allows us to simulate and test real-world dashboard aggregations without exposing real Personally Identifiable Information (PII).
 
 ---
 
-## Testing & Quality Assurance
+## Implementation Status
 
-- **API Testing**: We utilize Jest and Supertest to verify that critical endpoints (Authentication, Role validation, Trainee registration) function deterministically.
-- **Database Seeding**: A robust `seed.js` script generates 100+ synthetic trainee records across multiple Maharashtra districts. This allows us to simulate and test real-world dashboard aggregations without ever exposing real Personally Identifiable Information (PII).
-- **Code Consistency**: Strict ESLint and Prettier configurations are enforced to maintain standard formatting throughout the rapid hackathon sprint.
+**Fully Implemented:**
+- **Authentication & RBAC:** JWT-based login for multiple roles (government, training_provider, employer).
+- **Trainee & Course Management:** Registration of trainees and enrollments.
+- **Longitudinal Tracking:** Database models and routes for tracking wage history, employment outcomes, and follow-ups.
+- **Consent Management:** Schema and endpoints for tracking trainee opt-ins for data processing.
+- **Aggregated Analytics:** MongoDB aggregations powering the dashboard.
+
+**Partially Implemented / Prototype Features:**
+- **Employer Verification:** Basic CRUD logic for verification workflows (no actual automated email/SMS dispatching implemented yet).
+- **Skill-Gap Analysis:** Mapped via rule-based simulations in `aiService.js` (no real NLP/Python model).
+- **Employment Prediction:** Simulates probability scoring using randomized heuristics in Node.js.
 
 ---
 
@@ -232,32 +206,36 @@ uvicorn main:app --reload --port 8000
 ### Authentication
 *Note: Endpoints requiring Auth expect the `Authorization: Bearer <token>` header.*
 
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| `POST` | `/api/auth/login` | Any | Authenticates user and returns RBAC JWT. |
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/login` | Authenticates user and returns JWT. |
+| `POST` | `/api/auth/register` | Registers a new user. |
 
 ### Core Entities
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| `POST` | `/api/trainees` | Provider | Registers a new trainee with consent tracking. |
-| `GET` | `/api/trainees/:id` | Provider | Retrieves longitudinal history of a trainee. |
-| `POST` | `/api/employment` | Provider | Logs a new employment/placement record. |
-| `POST` | `/api/verify/trigger`| Provider | Generates and sends a Magic Link to an employer. |
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET/POST` | `/api/trainees` | Manage trainees. |
+| `GET/POST` | `/api/training` | Manage courses and enrollments. |
+| `GET/POST` | `/api/employment` | Manage employment records. |
+| `GET` | `/api/verification/pending` | Fetch pending employer verifications. |
+| `PUT` | `/api/verification/:id` | Process an employer verification. |
+| `GET/POST` | `/api/consent` | Manage trainee consent records. |
+| `GET/POST` | `/api/followup` | Manage follow-up assessments. |
 
-### Outcome Intelligence
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| `GET` | `/api/analytics/dashboard`| Gov | Returns aggregated KPIs (retention, wage growth, placement rates). |
-| `POST` | `/api/ai/skill-gap` | Gov | Calls FastAPI to identify delta in required skills vs taught skills. |
+### Outcome Intelligence & Analytics
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/analytics/government`| Returns aggregated KPIs for the dashboard. |
+| `POST` | `/api/ai/skill-gap` | Calls mock AI service to identify delta in required vs taught skills. |
+| `POST` | `/api/ai/predict-employment`| Calls mock AI service to predict employment probability. |
 
 ---
 
 ## Security Hardening & Privacy
 
-- **Consent Architecture**: Trainees must explicitly provide consent during registration. If revoked, the backend nullifies PII (Name, Phone, Email) but retains anonymized placement data to preserve macro-level economic statistics.
-- **Strict RBAC Middleware**: Routes are protected by an explicit Role-Based Access Control matrix. Training Providers can only view their own cohorts; Trainees can only view their own records; Government users have read-only access to aggregated data.
-- **Magic Link Security**: Employer verification URLs contain JWTs with strict 48-hour expirations. The validation endpoint is rate-limited to prevent brute-force token guessing.
-- **Input Validation**: All incoming requests are strictly validated using schema-based validation libraries to prevent NoSQL injection and XSS attacks.
+- **Consent Architecture**: Schema supports explicit consent tracking.
+- **Strict RBAC Middleware**: Routes are protected by Role-Based Access Control logic within Express.
+- **Data Validation**: Express backend implements structured error handling and validation logic.
 
 ---
 
