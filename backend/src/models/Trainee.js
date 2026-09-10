@@ -23,6 +23,10 @@ const traineeSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
   },
+  consentStatus: {
+    type: Boolean,
+    default: false,
+  },
   skillPulseId: {
     type: String,
     unique: true,
