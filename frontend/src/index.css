@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply text-neutral-900 bg-neutral-50 antialiased;
+  }
+}
+
+@layer components {
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  .card {
+    @apply bg-white border border-neutral-200 rounded-lg shadow-sm;
+  }
+
+  .nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors;
+  }
+  
+  .nav-item-active {
+    @apply bg-primary-50 text-primary-700;
+  }
+  
+  .nav-item-inactive {
+    @apply text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900;
+  }
+}
