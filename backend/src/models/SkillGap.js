@@ -7,11 +7,13 @@ const skillGapSchema = new mongoose.Schema({
     required: true,
   },
   requiredSkill: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Skill',
     required: true,
   },
   availableSkill: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Skill',
     required: true,
   },
   gapScore: {
